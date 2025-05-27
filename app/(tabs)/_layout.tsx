@@ -1,45 +1,72 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs } from "expo-router";
+import "react-native-reanimated";
+import { icons } from "./../../constants/icons";
+import TabBarIcon from "./../../components/TabBarIcon";
+import {SafeAreaView} from "react-native-safe-area-context";
+import { View } from "react-native";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
+            <View className="flex-1 bg-transparent">
+
+
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
+        tabBarStyle: {
+          height: 60, // ⬅️ Increase height here
+          paddingBottom: 10, // ⬅️ Adjust padding inside the tab bar
+          paddingTop: 10,
+          marginVertical: 30, // ⬅️ Add vertical margin
+          marginHorizontal: 10, // ⬅️ Add horizontal margin
+          borderRadius: 20, // ⬅️ Add rounded corners
+          backgroundColor: "#2C2C2E", // ⬅️ Set background color
+          position: "absolute", // ⬅️ Ensure it stays at the bottom
+          bottom: 0, // ⬅️ Position at the bottom
+        },
+        tabBarItemStyle: {
+          flex: 1, // ⬅️ Ensure each tab takes equal space
+          alignItems: "center", // ⬅️ Center items horizontally
+          justifyContent: "center", // ⬅️ Center items vertically
+        },
+
+
+
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "Home",
+          tabBarLabel: () => null, // hide label (we handle it in the component)
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon focused={focused} icon={icons.home} title="Home" />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="bookmark"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "Bookmark",
+          tabBarLabel: () => null,
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon focused={focused} icon={icons.save} title="Bookmark" />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarLabel: () => null,
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon focused={focused} icon={icons.person} title="Profile" />
+          ),
         }}
       />
     </Tabs>
+    </View>
   );
 }
