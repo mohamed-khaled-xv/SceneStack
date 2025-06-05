@@ -1,4 +1,4 @@
-Welcome to **SceneStack**, a sleek React Native app built with Expo Router. CastHub lets users explore movie and cast details fetched from TMDB (The Movie Database). The app features a modern, dark-themed UI with smooth navigation and intuitive design.
+Welcome to **SceneStack**, a sleek React Native app built with Expo Router. SceneStack lets users explore movie and cast details fetched from TMDB (The Movie Database). The app features a modern, dark-themed UI with smooth navigation and intuitive design.
 
 ---
 
