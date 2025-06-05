@@ -29,9 +29,8 @@ const TabBarIcon: React.FC<TabBarIconProps> = ({ focused, icon, title }) => {
         {
           alignItems: "center",
           justifyContent: "center",
-          paddingVertical: 8,
           paddingHorizontal: 12,
-          minHeight: 60,
+          minHeight: 45,
           minWidth: focused ? 100 : 90,
           borderRadius: 10,
           backgroundColor: focused ? "#FF8700" : "transparent",
@@ -42,8 +41,8 @@ const TabBarIcon: React.FC<TabBarIconProps> = ({ focused, icon, title }) => {
       <Image
         source={icon}
         style={{
-          width: 24,
-          height: 24,
+          width: 20,
+          height: 20,
           marginBottom: 2,
           tintColor: focused ? "#fff" : "#999",
         }}
