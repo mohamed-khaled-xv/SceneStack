@@ -4,6 +4,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import "./global.css";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
+import { DatabaseProvider } from "../database";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -23,24 +24,26 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView className="flex-1 bg-[#1C1C1E]">
-        <Stack
-          screenOptions={{
-            contentStyle: {
-              backgroundColor: "transparent",
-            },
-          }}
-        >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="movie/[id]"
-            options={{
-              headerShown: false,
+      <DatabaseProvider>
+        <SafeAreaView className="flex-1 bg-[#1C1C1E]">
+          <Stack
+            screenOptions={{
+              contentStyle: {
+                backgroundColor: "transparent",
+              },
             }}
-          />
-          <Stack.Screen name="cast/[id]" options={{ headerShown: false }} />
-        </Stack>
-      </SafeAreaView>
+          >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="movie/[id]"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen name="cast/[id]" options={{ headerShown: false }} />
+          </Stack>
+        </SafeAreaView>
+      </DatabaseProvider>
     </SafeAreaProvider>
   );
 }
