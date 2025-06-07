@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons"; // Ensure you have this package installedimxport { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -12,19 +12,26 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { icons } from "../../constants/icons"; // Adjust the import path as necessary
-import { getCast } from "../../services/getCast"; // Adjust the import path as necessary
-import { getMovieDetails } from "../../services/getMovieDetails"; // Adjust the import path as necessary
-import { CastMember } from "../../types/Cast"; // Adjust the import path as necessary
-import { MovieDetailsInterface } from "../../types/movie"; //
+import { icons } from "../../constants/icons";
+import { getCast } from "../../services/getCast";
+import { getMovieDetails } from "../../services/getMovieDetails";
+import { CastMember } from "../../types/Cast";
+import { MovieDetailsInterface } from "../../types/Movie";
+import { useSQLiteContext } from "../../database";
+import {
+  insertMovie,
+  isMovieBookmarked,
+} from "../../database/repositories/MovieRepository";
 
 const MovieDetails = () => {
   const { id } = useLocalSearchParams();
   const [cast, setCast] = useState<CastMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [Bookmark, setBookmark] = useState(false);
   const [movieDetails, setMovieDetails] =
     useState<MovieDetailsInterface | null>(null);
   const router = useRouter();
+  const db = useSQLiteContext();
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -54,6 +61,29 @@ const MovieDetails = () => {
     fetchCast();
   }, [movieDetails]);
 
+  useEffect(() => {
+    const checkBookmark = async () => {
+      if (movieDetails) {
+        const bookmarked = await isMovieBookmarked(db, movieDetails.id);
+        setBookmark(bookmarked);
+      }
+    };
+    checkBookmark();
+  }, [movieDetails]);
+
+  const saveToBookmarks = async (movieDetails: MovieDetailsInterface) => {
+    if (movieDetails) {
+      setBookmark(true);
+      await insertMovie(db, {
+        id: movieDetails.id,
+        title: movieDetails.title,
+        poster_path: movieDetails.poster_path,
+        release_date: movieDetails.release_date,
+      });
+      console.log("Saved to bookmarks:", movieDetails);
+    }
+  };
+
   return (
     <View className="flex-1 bg-[#1C1C1E]">
       {movieDetails ? (
@@ -75,10 +105,14 @@ const MovieDetails = () => {
 
               {/* Bookmark Button */}
               <TouchableOpacity
-                onPress={() => console.log("Bookmark pressed")}
+                onPress={() => saveToBookmarks(movieDetails)}
                 className="absolute top-10 right-5 z-50"
               >
-                <Ionicons name="bookmark" size={32} color="white" />
+                <Ionicons
+                  name={Bookmark ? "heart" : "heart-outline"}
+                  size={32}
+                  color="white"
+                />
               </TouchableOpacity>
 
               {/* Gradient fade at the bottom */}
@@ -132,7 +166,7 @@ const MovieDetails = () => {
               className="ml-3"
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  className="mr-4"
+                  className="mr-4 max-w-24"
                   onPress={() =>
                     router.push({
                       pathname: "../cast/[id]" as const,
