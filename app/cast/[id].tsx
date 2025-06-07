@@ -1,22 +1,21 @@
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  View,
-  Text,
   ActivityIndicator,
-  ScrollView,
-  ImageBackground,
-  TouchableOpacity,
-  Linking,
   FlatList,
   Image,
+  ImageBackground,
+  Linking,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useEffect, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
-import { CastDetail } from "../../types/Cast";
 import { getCastDetails, getCastMovies } from "../../services/getCastDetails";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
-import { MovieDetailsInterface } from "../../types/movie"; // Adjust the import path as necessary
+import { CastDetail } from "../../types/Cast";
+import { MovieDetailsInterface } from "../../types/movie";
 
 const CastDetails = () => {
   const { id } = useLocalSearchParams();
@@ -200,7 +199,7 @@ const CastDetails = () => {
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
             <TouchableOpacity
-              className="mb-4 max-w-32 mr-4"
+              className=" max-w-32 mr-4"
               onPress={() => handleMoviePress(item.id)}
             >
               <Image
@@ -211,6 +210,9 @@ const CastDetails = () => {
                 resizeMode="cover"
               />
               <Text className="text-white text-lg">{item.title}</Text>
+              <Text className="text-gray-400 text-sm">
+                {new Date(item.release_date).getFullYear()}
+              </Text>
             </TouchableOpacity>
           )}
         />

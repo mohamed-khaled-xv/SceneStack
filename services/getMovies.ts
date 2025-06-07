@@ -1,6 +1,6 @@
 // services/getMovies.ts
 import axios from 'axios';
-import { GetMoviesParams } from '../types/MovieParams';
+import { GetMoviesParams } from '../types/movie';
 const BASE_URL = 'https://api.themoviedb.org/3/discover/movie';
 const BEARER_TOKEN = process.env.EXPO_PUBLIC_API_TOKEN; // Replace with actual token or import from env
 
