@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -12,8 +13,7 @@ import SearchBar from "../../components/SearchBar";
 import { icons } from "../../constants/icons";
 import { MovieGenreMap } from "../../constants/moviegenre";
 import { getMovies } from "../../services/getMovies";
-import { Movie } from "../../types/Movie"; // Adjust the import path as necessary
-import { useRouter } from "expo-router";
+import { Movie } from "../../types/movie"; // Adjust the import path as necessary
 
 const categories = Object.keys(MovieGenreMap);
 

@@ -1,54 +1,61 @@
-import { useSQLiteContext } from 'expo-sqlite';
-import { useCallback, useState } from 'react';
-import { Text, View,Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { getAllMovies } from '../../database/repositories/MovieRepository';
-import { Movie } from '../../types/Movie';
+import * as React from "react";
+import { View, useWindowDimensions } from "react-native";
+import { TabView, SceneMap } from "react-native-tab-view";
+import FavoriteMoviesList from "../../components/FavoriteMoviesList";
+import ToWatchMoviesList from "../../components/ToWatchMoviesList";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useFocusEffect } from 'expo-router';
-import React from 'react';
+// Render your tab scenes
+const renderScene = SceneMap({
+  favorite: FavoriteMoviesList,
+  to_watch: ToWatchMoviesList,
+});
 
-const Bookmark = () => {
-  const db = useSQLiteContext();
-  const [bookmarkedMovies, setBookmarkedMovies] = useState<Movie[]>([]);
+// Dots indicator component (NativeWind style)
+type DotIndicatorProps = {
+  total: number;
+  active: number;
+};
 
-  const fetchBookmarkedMovies = useCallback(async () => {
-    const response = await getAllMovies(db);
-    setBookmarkedMovies(response);
-  }, [db]);
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchBookmarkedMovies();
-    }, [fetchBookmarkedMovies])
+function DotIndicator({ total, active }: DotIndicatorProps) {
+  return (
+    <View className="flex-row justify-center items-center">
+      {[...Array(total)].map((_, i) => (
+        <View
+          key={i}
+          className={`w-12 h-2  mx-1 ${
+            i === active ? "bg-white" : "bg-gray-600"
+          }`}
+        />
+      ))}
+    </View>
   );
+}
 
-  if(!bookmarkedMovies.length) {
-    return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-[#1C1C1E]">
-        <Text className="text-white">No Bookmarked Movies</Text>
-      </SafeAreaView>
-    );
-  }
+export default function BookmarkScreen() {
+  const layout = useWindowDimensions();
+  const [index, setIndex] = React.useState(0);
+  const routes = [
+    { key: "favorite", title: "Favorite Movies" },
+    { key: "to_watch", title: "To Watch" },
+  ];
 
   return (
-    
     <SafeAreaView className="flex-1 bg-[#1C1C1E]">
-      <View className="p-4">
-        <Text className="text-white text-lg font-bold mb-4">Bookmarked Movies</Text>
-        {bookmarkedMovies.map(movie => (
-          <View key={movie.id} className="mb-4">
-            <Image
-              source={{ uri: `https://image.tmdb.org/t/p/w500/${movie.poster_path}` }}
-              className="w-1/2 h-48 rounded-lg mb-2"
-            />
-            <Text className="text-white">{movie.title}</Text>
-            <Text className="text-gray-400">{movie.release_date}</Text>
-          </View>
-        ))}
+      <View className="flex-1">
+        <TabView
+          navigationState={{ index, routes }}
+          renderScene={renderScene}
+          onIndexChange={setIndex}
+          initialLayout={{ width: layout.width }}
+          renderTabBar={() => null}
+          style={{ backgroundColor: "#1C1C1E" }}
+        />
+        {/* Absolute position, so always on screen */}
+        <View className="absolute left-0 right-0 bottom-8">
+          <DotIndicator total={routes.length} active={index} />
+        </View>
       </View>
     </SafeAreaView>
   );
 }
-
-export default Bookmark;

@@ -5,6 +5,8 @@ import "./global.css";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import { DatabaseProvider } from "../database";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -23,6 +25,7 @@ export default function RootLayout() {
   }
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <SafeAreaProvider>
       <DatabaseProvider>
         <SafeAreaView className="flex-1 bg-[#1C1C1E]">
@@ -42,8 +45,10 @@ export default function RootLayout() {
             />
             <Stack.Screen name="cast/[id]" options={{ headerShown: false }} />
           </Stack>
+          
         </SafeAreaView>
       </DatabaseProvider>
     </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
