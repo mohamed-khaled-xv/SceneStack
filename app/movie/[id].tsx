@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -13,15 +13,22 @@ import {
   View,
 } from "react-native";
 import { icons } from "../../constants/icons";
+import { useSQLiteContext } from "../../database";
+import {
+  insertFavoriteMovie,
+  isMovieFavorite,
+  deleteFavoriteMovie,
+} from "../../database/repositories/FavoriteMoviesRepository";
+import {
+  insertToWatchMovie,
+  isMovieToWatch,
+  deleteToWatchMovie,
+} from "../../database/repositories/ToWatchMoviesRepository";
 import { getCast } from "../../services/getCast";
 import { getMovieDetails } from "../../services/getMovieDetails";
 import { CastMember } from "../../types/Cast";
-import { MovieDetailsInterface } from "../../types/Movie";
-import { useSQLiteContext } from "../../database";
-import {
-  insertMovie,
-  isMovieBookmarked,
-} from "../../database/repositories/MovieRepository";
+import { MovieDetailsInterface } from "../../types/movie";
+import TooltipMenu from "../../components/TooltipMenu";
 
 const MovieDetails = () => {
   const { id } = useLocalSearchParams();
@@ -30,6 +37,9 @@ const MovieDetails = () => {
   const [Bookmark, setBookmark] = useState(false);
   const [movieDetails, setMovieDetails] =
     useState<MovieDetailsInterface | null>(null);
+  const [toWatch, setToWatch] = useState(false);
+  const [favorite, setFavorite] = useState(false);
+
   const router = useRouter();
   const db = useSQLiteContext();
 
@@ -62,30 +72,62 @@ const MovieDetails = () => {
   }, [movieDetails]);
 
   useEffect(() => {
-    const checkBookmark = async () => {
+    const checktoWatch = async () => {
       if (movieDetails) {
-        const bookmarked = await isMovieBookmarked(db, movieDetails.id);
-        setBookmark(bookmarked);
+        const toWatch = await isMovieToWatch(db, movieDetails.id);
+        setToWatch(toWatch);
       }
     };
-    checkBookmark();
+    checktoWatch();
   }, [movieDetails]);
 
-  const saveToBookmarks = async (movieDetails: MovieDetailsInterface) => {
-    if (movieDetails) {
-      setBookmark(true);
-      await insertMovie(db, {
+  useEffect(() => {
+    const checkFavorite = async () => {
+      if (movieDetails) {
+        const isFav = await isMovieFavorite(db, movieDetails.id);
+        setFavorite(isFav);
+      }
+    };
+    checkFavorite();
+  }, [movieDetails]);
+
+
+
+  const watchlistHandler = async (movieDetails: MovieDetailsInterface) => {
+    if (!toWatch) {
+      setToWatch(true);
+      await insertToWatchMovie(db, {
         id: movieDetails.id,
         title: movieDetails.title,
         poster_path: movieDetails.poster_path,
         release_date: movieDetails.release_date,
       });
-      console.log("Saved to bookmarks:", movieDetails);
+      console.log("Saved to watchlist:", movieDetails);
+    } else {
+      setToWatch(false);
+      await deleteToWatchMovie(db, movieDetails.id);
+      console.log("Removed from watchlist:", movieDetails);
+    }
+  };
+
+  const favoriteHandler = async (movieDetails: MovieDetailsInterface) => {
+    if (!favorite) {
+      setFavorite(true);
+      await insertFavoriteMovie(db, {
+        id: movieDetails.id,
+        title: movieDetails.title,
+        poster_path: movieDetails.poster_path,
+        release_date: movieDetails.release_date,
+      });
+    } else {
+      setFavorite(false);
+      await deleteFavoriteMovie(db, movieDetails.id);
     }
   };
 
   return (
     <View className="flex-1 bg-[#1C1C1E]">
+
       {movieDetails ? (
         <ScrollView>
           <ScrollView className="width-full h-96 ">
@@ -104,16 +146,36 @@ const MovieDetails = () => {
               </TouchableOpacity>
 
               {/* Bookmark Button */}
-              <TouchableOpacity
-                onPress={() => saveToBookmarks(movieDetails)}
-                className="absolute top-10 right-5 z-50"
-              >
-                <Ionicons
-                  name={Bookmark ? "heart" : "heart-outline"}
-                  size={32}
-                  color="white"
+              <View className="absolute top-10 right-5 z-50">
+                <TooltipMenu
+                  icon={
+                    <Ionicons
+                      name={Bookmark ? "heart" : "heart-outline"}
+                      size={32}
+                      color="white"
+                    />
+                  }
+                  actions={[
+                    {
+                      icon: toWatch ? "list-circle" : "list-circle-outline",
+                      onPress: () => watchlistHandler(movieDetails!),
+                      color: "orange",
+                      name: toWatch
+                        ? "Remove from Watchlist"
+                        : "Add to Watchlist",
+                    },
+
+                    {
+                      icon: favorite ? "star" : "star-outline",
+                      onPress: () => favoriteHandler(movieDetails!),
+                      color: "orange",
+                      name: favorite
+                        ? "Remove from Favorites"
+                        : "Add to Favorites",
+                    },
+                  ]}
                 />
-              </TouchableOpacity>
+              </View>
 
               {/* Gradient fade at the bottom */}
               <LinearGradient
