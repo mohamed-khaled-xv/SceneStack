@@ -29,6 +29,7 @@ import { getMovieDetails } from "../../services/getMovieDetails";
 import { CastMember } from "../../types/Cast";
 import { MovieDetailsInterface } from "../../types/movie";
 import TooltipMenu from "../../components/TooltipMenu";
+import {addToWatchHistory} from "@/services/firebase/watchHistory";
 
 const MovieDetails = () => {
   const { id } = useLocalSearchParams();
@@ -49,6 +50,7 @@ const MovieDetails = () => {
       try {
         const details = await getMovieDetails(Number(id));
         setMovieDetails(details);
+        await addToWatchHistory(details.id.toString());
       } catch (error) {
         console.error("Failed to fetch movie details:", error);
       }
