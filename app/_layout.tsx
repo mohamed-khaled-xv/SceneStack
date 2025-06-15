@@ -1,11 +1,12 @@
-import "react-native-reanimated";
-import { Stack, SplashScreen } from "expo-router";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import "./global.css";
+import '@/firebaseConfig'
 import { useFonts } from "expo-font";
+import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
-import { DatabaseProvider } from "../database";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import "react-native-reanimated";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { DatabaseProvider } from "../database";
+import "./global.css";
 
 
 export default function RootLayout() {
@@ -36,6 +37,7 @@ export default function RootLayout() {
               },
             }}
           >
+            <Stack.Screen name="auth" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen
               name="movie/[id]"
