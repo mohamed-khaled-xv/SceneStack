@@ -30,7 +30,6 @@ import { CastMember } from "../../types/Cast";
 import { MovieDetailsInterface } from "../../types/movie";
 import TooltipMenu from "../../components/TooltipMenu";
 import {addToWatchHistory} from "@/services/firebase/watchHistory";
-
 const MovieDetails = () => {
   const { id } = useLocalSearchParams();
   const [cast, setCast] = useState<CastMember[]>([]);
@@ -50,7 +49,16 @@ const MovieDetails = () => {
       try {
         const details = await getMovieDetails(Number(id));
         setMovieDetails(details);
-        await addToWatchHistory(details.id.toString());
+        const watchHistoryObj: any = {
+          id: details.id,
+          original_title: details.original_title,
+          poster_path: details.poster_path,
+          release_date: details.release_date,
+          vote_average: details.vote_average,
+          watchedAt: new Date().toISOString(),
+
+        };
+        await addToWatchHistory(watchHistoryObj);
       } catch (error) {
         console.error("Failed to fetch movie details:", error);
       }

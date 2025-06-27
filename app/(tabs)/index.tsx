@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -9,11 +9,16 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import SearchBar from "../../components/SearchBar";
 import { icons } from "../../constants/icons";
 import { MovieGenreMap } from "../../constants/moviegenre";
 import { getMovies } from "../../services/getMovies";
 import { Movie } from "../../types/movie"; // Adjust the import path as necessary
+import { getWatchHistory } from "@/services/firebase/watchHistory";
+import { auth } from "@/firebaseConfig";
+import { getUserMetadata } from "@/services/firebase/users";
+import { UserMetadataInterface } from "@/types/user";
 
 const categories = Object.keys(MovieGenreMap);
 
@@ -21,6 +26,9 @@ const IndexScreen = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
+  const [watchHistory, setWatchHistory] = useState<any[]>([]); // Adjust type as necessary
+  const [userMetadata, setUserMetadata] =
+    useState<UserMetadataInterface | null>(null); // Adjust type as necessary
   const router = useRouter();
 
   useEffect(() => {
@@ -43,9 +51,82 @@ const IndexScreen = () => {
     fetchMovies();
   }, [selectedCategory]);
 
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const fetchWatchHistory = async () => {
+        try {
+          const history = await getWatchHistory();
+          if (isActive) {
+            setWatchHistory(history);
+          }
+        } catch (error) {
+          console.error("Failed to fetch watch history:", error);
+        }
+      };
+
+      fetchWatchHistory();
+
+      return () => {
+        isActive = false;
+      };
+    }, [])
+  );
+
+  useEffect(() => {
+    const fetchUserMetadata = async () => {
+      try {
+        const metadata = await getUserMetadata();
+        setUserMetadata(metadata);
+      } catch (error) {
+        console.error("Failed to fetch user metadata:", error);
+      }
+    };
+
+    fetchUserMetadata();
+  }, []);
+
   const renderHeader = () => (
     <View>
+      {userMetadata && (
+        <Text className="text-gray-500 text-lg font-inter mb-2 ml-6">Welcome {userMetadata.name}</Text>
+      )}
       <SearchBar />
+      {watchHistory.length > 0 && (
+        <View className="p-4">
+          <Text className="text-white text-lg font-inter mb-2">
+            Recently Viewed Movies
+          </Text>
+          <FlatList
+            data={watchHistory}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => `history-${item.id}`}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                className="mr-3"
+                activeOpacity={0.7}
+                onPress={() =>
+                  router.push({
+                    pathname: "../movie/[id]" as const,
+                    params: { id: String(item.id) },
+                  })
+                }
+              >
+                <Image
+                  source={{
+                    uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
+                  }}
+                  className="w-32 h-48 rounded-lg"
+                  resizeMode="cover"
+                />
+                <Text className="text-white mt-2">{item.title}</Text>
+              </TouchableOpacity>
+            )}
+          ></FlatList>
+        </View>
+      )}
 
       <View className="p-4">
         <Text className="text-white text-lg font-inter">Categories</Text>
@@ -87,7 +168,7 @@ const IndexScreen = () => {
     <SafeAreaView className="flex-1 bg-[#181A20]">
       <FlatList
         data={movies}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => `movie-${item.id}`}
         numColumns={3}
         ListHeaderComponent={renderHeader}
         contentContainerStyle={{ paddingBottom: 20 }}
