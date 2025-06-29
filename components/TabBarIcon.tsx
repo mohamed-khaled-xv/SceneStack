@@ -31,7 +31,7 @@ const TabBarIcon: React.FC<TabBarIconProps> = ({ focused, icon, title }) => {
           justifyContent: "center",
           paddingHorizontal: 12,
           minHeight: 45,
-          minWidth: focused ? 100 : 90,
+          minWidth: focused ? 70 : 90,
           borderRadius: 10,
           backgroundColor: focused ? "#FF8700" : "transparent",
         },
@@ -41,22 +41,14 @@ const TabBarIcon: React.FC<TabBarIconProps> = ({ focused, icon, title }) => {
       <Image
         source={icon}
         style={{
-          width: 20,
-          height: 20,
+          width: 25,
+          height: 25,
           marginBottom: 2,
           tintColor: focused ? "#fff" : "#999",
         }}
         resizeMode="contain"
       />
-      <Text
-        style={{
-          color: focused ? "#fff" : "#999",
-          fontSize: 11,
-          fontWeight: focused ? "600" : "400",
-        }}
-      >
-        {title}
-      </Text>
+
     </Animated.View>
   );
 };

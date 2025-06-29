@@ -42,6 +42,21 @@ export default function TabLayout() {
             ),
           }}
         />
+                <Tabs.Screen
+          name="search"
+          options={{
+            title: "Search",
+            tabBarLabel: () => null,
+            headerShown: false,
+            tabBarIcon: ({ focused }) => (
+              <TabBarIcon
+                focused={focused}
+                icon={icons.search}
+                title="Search"
+              />
+            ),
+          }}
+        />
         <Tabs.Screen
           name="bookmark"
           options={{
@@ -72,6 +87,7 @@ export default function TabLayout() {
             ),
           }}
         />
+
       </Tabs>
     </View>
   );
