@@ -29,7 +29,11 @@ import { getMovieDetails } from "../../services/getMovieDetails";
 import { CastMember } from "../../types/Cast";
 import { MovieDetailsInterface } from "../../types/movie";
 import TooltipMenu from "../../components/TooltipMenu";
-import {addToWatchHistory} from "@/services/firebase/watchHistory";
+import { addToWatchHistory } from "@/services/firebase/watchHistory";
+import { Linking } from "react-native";
+import { getMovieTrailer } from "@/services/getMovieTrailer";
+import { MovieTrailerResult } from "../../types/movie";
+
 const MovieDetails = () => {
   const { id } = useLocalSearchParams();
   const [cast, setCast] = useState<CastMember[]>([]);
@@ -39,6 +43,7 @@ const MovieDetails = () => {
     useState<MovieDetailsInterface | null>(null);
   const [toWatch, setToWatch] = useState(false);
   const [favorite, setFavorite] = useState(false);
+  const [trailer, setTrailer] = useState<MovieTrailerResult | null>(null);
 
   const router = useRouter();
   const db = useSQLiteContext();
@@ -51,12 +56,11 @@ const MovieDetails = () => {
         setMovieDetails(details);
         const watchHistoryObj: any = {
           id: details.id,
-          original_title: details.original_title,
+          title: details.title,
           poster_path: details.poster_path,
           release_date: details.release_date,
           vote_average: details.vote_average,
           watchedAt: new Date().toISOString(),
-
         };
         await addToWatchHistory(watchHistoryObj);
       } catch (error) {
@@ -101,7 +105,28 @@ const MovieDetails = () => {
     checkFavorite();
   }, [movieDetails]);
 
+  useEffect(() => {
+    const fetchTrailer = async () => {
+      if (movieDetails) {
+        try {
+          const trailerData = await getMovieTrailer(movieDetails.id);
+          console.log("id:", movieDetails.id);
+          setTrailer(trailerData);
+        } catch (error) {
+          console.error("Failed to fetch movie trailer:", error);
+        }
+      }
+    };
+    fetchTrailer();
+  }, [movieDetails]);
 
+  const onOpenTrailer = async () => {
+    if (trailer) {
+      const trailerKey = trailer.key;
+      const youtubeUrl = `https://www.youtube.com/watch?v=${trailerKey}`;
+      await Linking.openURL(youtubeUrl);
+    }
+  };
 
   const watchlistHandler = async (movieDetails: MovieDetailsInterface) => {
     if (!toWatch) {
@@ -137,7 +162,6 @@ const MovieDetails = () => {
 
   return (
     <View className="flex-1 bg-[#1C1C1E]">
-
       {movieDetails ? (
         <ScrollView>
           <ScrollView className="width-full h-96 ">
@@ -227,6 +251,25 @@ const MovieDetails = () => {
             <Text className="text-white text-xl font-nunito mt-2 ml-3">
               {movieDetails.overview}
             </Text>
+            {trailer && (
+              <TouchableOpacity
+                className="flex-row items-center justify-center bg-[#FF0000] rounded-full px-5 py-3 mt-4 ml-3"
+                activeOpacity={0.85}
+                onPress={onOpenTrailer}
+                style={{
+                  shadowColor: "#FF0000",
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 4,
+                }}
+              >
+                <Ionicons name="logo-youtube" size={28} color="#fff" />
+                <Text className="text-white font-bold text-cneter text-lg ml-3">
+                  Watch Trailer
+                </Text>
+              </TouchableOpacity>
+            )}
+
             <Text className="text-white font-inter text-[20px] py-5  ml-3">
               Cast
             </Text>
