@@ -39,9 +39,9 @@ const IndexScreen = () => {
   const [topRatedMovies, setTopRatedMovies] = useState<Movie[]>([]);
   const [topRatedLoading, setTopRatedLoading] = useState(true);
 
-  const [userMetadata, setUserMetadata] = useState<UserMetadataInterface | null>(null);
+  const [userMetadata, setUserMetadata] =
+    useState<UserMetadataInterface | null>(null);
   const [userLoading, setUserLoading] = useState(true);
-
 
   const router = useRouter();
 
@@ -49,7 +49,9 @@ const IndexScreen = () => {
     setMoviesLoading(true);
     const fetchMovies = async () => {
       try {
-        const genreId = selectedCategory ? MovieGenreMap[selectedCategory] : undefined;
+        const genreId = selectedCategory
+          ? MovieGenreMap[selectedCategory]
+          : undefined;
         const response = await getMovies({
           sortBy: "popularity.desc",
           genreId,
@@ -78,7 +80,9 @@ const IndexScreen = () => {
         setHistoryLoading(false);
       };
       fetchWatchHistory();
-      return () => { isActive = false; };
+      return () => {
+        isActive = false;
+      };
     }, [])
   );
 
@@ -112,7 +116,6 @@ const IndexScreen = () => {
     fetchNowPlayingMovies();
   }, []);
 
-
   // Upcoming Movies
   useEffect(() => {
     setUpcomingLoading(true);
@@ -143,124 +146,138 @@ const IndexScreen = () => {
     fetchTopRatedMovies();
   }, []);
 
-
-
   // Main loading is TRUE if any are loading
-  const loading = moviesLoading || historyLoading || nowPlayingLoading || userLoading || upcomingLoading || topRatedLoading;
+  const loading =
+    moviesLoading ||
+    historyLoading ||
+    nowPlayingLoading ||
+    userLoading ||
+    upcomingLoading ||
+    topRatedLoading;
 
   // ---- Header Rendering ----
   const renderHeader = () => (
     <View>
-{userMetadata && (
-  <View className="flex-row items-center justify-between px-5 py-4 bg-[#232732] rounded-3xl shadow-lg mx-3">
-    {/* Left: Welcome text */}
-    <View>
-      <Text className="text-gray-400 text-base font-inter">Welcome 👋</Text>
-      <Text className="text-white text-xl font-inter mt-1">
-        {userMetadata.name}
-      </Text>
-    </View>
+      {userMetadata && (
+        <View className="flex-row items-center justify-between px-5 py-4 bg-[#232732] rounded-3xl shadow-lg mx-3 mt-4">
+          {/* Left: Welcome text */}
+          <View>
+            <Text className="text-gray-400 text-base font-inter">
+              Welcome 👋
+            </Text>
+            <Text className="text-white text-xl font-inter mt-1">
+              {userMetadata.name}
+            </Text>
+          </View>
 
-    {/* Right: Profile avatar */}
-    <TouchableOpacity
-      onPress={() => router.push("/profile")}
-      activeOpacity={0.7}
-      className="ml-4"
-      style={{
-      }}
-    >
-      <Image
-        source={icons.homeProfile}
-        className="w-14 h-14 rounded-full"
-        resizeMode="cover"
-      />
-    </TouchableOpacity>
-  </View>
-)}
-
+          {/* Right: Profile avatar */}
+          <TouchableOpacity
+            onPress={() => router.push("/profile")}
+            activeOpacity={0.7}
+            className="ml-4"
+            style={{}}
+          >
+            <Image
+              source={icons.homeProfile}
+              className="w-14 h-14 rounded-full"
+              resizeMode="cover"
+            />
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Recently Viewed */}
       {watchHistory.length > 0 && (
-          <SectionCarousel
-            title="Recently Viewed Movies"
-            movies={watchHistory} 
-            onPressMovie={(movie) =>
-              router.push({
-                pathname: "../movie/[id]" as const,
-                params: { id: String(movie.id) },
-              })
-            }
-          />
+        <SectionCarousel
+          title="Recently Viewed Movies"
+          movies={watchHistory}
+          onPressMovie={(movie) =>
+            router.push({
+              pathname: "../movie/[id]" as const,
+              params: { id: String(movie.id) },
+            })
+          }
+        />
       )}
 
       {/* Now Playing */}
       {nowPlayingMovies.length > 0 && (
-          <SectionCarousel
-            title="Now Playing"
-            movies={nowPlayingMovies}
-            onPressMovie={(movie) =>
-              router.push({
-                pathname: "../movie/[id]" as const,
-                params: { id: String(movie.id) },
-              })
-            }
-          />
+        <SectionCarousel
+          title="Now Playing"
+          movies={nowPlayingMovies}
+          onPressMovie={(movie) =>
+            router.push({
+              pathname: "../movie/[id]" as const,
+              params: { id: String(movie.id) },
+            })
+          }
+        />
       )}
 
       {/* Upcoming Movies */}
       {upcomingMovies.length > 0 && (
-          <SectionCarousel
-            title="Upcoming Movies"
-            movies={upcomingMovies}
-            onPressMovie={(movie) =>
-              router.push({
-                pathname: "../movie/[id]" as const,
-                params: { id: String(movie.id) },
-              })
-            }
-          />
+        <SectionCarousel
+          title="Upcoming Movies"
+          movies={upcomingMovies}
+          onPressMovie={(movie) =>
+            router.push({
+              pathname: "../movie/[id]" as const,
+              params: { id: String(movie.id) },
+            })
+          }
+        />
       )}
 
       {/* Top Rated Movies */}
       {topRatedMovies.length > 0 && (
-          <SectionCarousel
-            title="Top Rated Movies"
-            movies={topRatedMovies}
-            onPressMovie={(movie) =>
-              router.push({
-                pathname: "../movie/[id]" as const,
-                params: { id: String(movie.id) },
-              })
-            }
-          />
+        <SectionCarousel
+          title="Top Rated Movies"
+          movies={topRatedMovies}
+          onPressMovie={(movie) =>
+            router.push({
+              pathname: "../movie/[id]" as const,
+              params: { id: String(movie.id) },
+            })
+          }
+        />
       )}
 
       {/* Categories */}
-      <View className="p-4">
-        <Text className="text-white text-lg font-inter">Categories</Text>
-        <FlatList
-          data={categories}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() =>
-                item !== selectedCategory
-                  ? setSelectedCategory(item)
-                  : setSelectedCategory("")
-              }
-              activeOpacity={0.6}
-              className={`p-3 mr-2 rounded-lg ${selectedCategory === item ? "bg-[#FF8700]" : "bg-[#2C2C2E]"}`}
-            >
-              <Text className={selectedCategory === item ? "text-black font-bold" : "text-white"}>
-                {item}
-              </Text>
-            </TouchableOpacity>
-          )}
-          className="py-5"
-        />
-      </View>
+      {movies.length > 0 && (
+        <View className="p-4">
+          <Text className="text-white text-lg font-inter">Categories</Text>
+          <FlatList
+            data={categories}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() =>
+                  item !== selectedCategory
+                    ? setSelectedCategory(item)
+                    : setSelectedCategory("")
+                }
+                activeOpacity={0.6}
+                className={`p-3 mr-2 rounded-lg ${
+                  selectedCategory === item ? "bg-[#FF8700]" : "bg-[#2C2C2E]"
+                }`}
+              >
+                <Text
+                  className={
+                    selectedCategory === item
+                      ? "text-black font-bold"
+                      : "text-white"
+                  }
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            )}
+            className="py-5"
+          />
+        </View>
+      )}
     </View>
   );
 
@@ -292,7 +309,9 @@ const IndexScreen = () => {
               className="w-full h-60 rounded-lg"
               resizeMode="cover"
             />
-            <Text className="text-white mt-2" numberOfLines={2}>{item.title}</Text>
+            <Text className="text-white mt-2" numberOfLines={2}>
+              {item.title}
+            </Text>
             <Text className="text-gray-400 text-sm">
               {item.release_date ? item.release_date.split("-")[0] : "Unknown"}
             </Text>
