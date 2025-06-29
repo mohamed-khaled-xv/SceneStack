@@ -29,7 +29,7 @@ export default function LoginScreen() {
     return (
       <View className="flex-1 justify-center items-center bg-[#1C1C1E]">
         <ActivityIndicator size="large" color="#FF8700 " />
-        <Text className="text-[#FF8700 ] text-lg ">Logging in...</Text>
+        <Text className="text-white text-lg ">Logging in...</Text>
       </View>
     );
   }
