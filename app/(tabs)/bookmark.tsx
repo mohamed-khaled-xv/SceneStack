@@ -52,7 +52,7 @@ export default function BookmarkScreen() {
           style={{ backgroundColor: "#1C1C1E" }}
         />
         {/* Absolute position, so always on screen */}
-        <View className="absolute left-0 right-0 bottom-8">
+        <View className="absolute left-0 right-0 bottom-10">
           <DotIndicator total={routes.length} active={index} />
         </View>
       </View>

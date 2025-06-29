@@ -94,7 +94,7 @@ const FavoriteMoviesList = () => {
     return <Text>Error: {error}</Text>;
   }
   if (favoriteMovies.length === 0) {
-    return <Text>No favorite movies found.</Text>;
+    return <Text className="text-[24px] text-white text-center mt-6">No favorite movies found.</Text>;
   }
   return (
     <FlatList
