@@ -32,25 +32,30 @@ import TooltipMenu from "../../components/TooltipMenu";
 import { addToWatchHistory } from "@/services/firebase/watchHistory";
 import { Linking } from "react-native";
 import { getMovieTrailer } from "@/services/getMovieTrailer";
-import { MovieTrailerResult } from "../../types/movie";
+import { MovieTrailerResult, Movie } from "../../types/movie";
+import { getMovieRecommendations } from "@/services/getMovieRecommendations";
 
 const MovieDetails = () => {
   const { id } = useLocalSearchParams();
   const [cast, setCast] = useState<CastMember[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [Bookmark, setBookmark] = useState(false);
+  const [isCastLoading, setIsCastLoading] = useState(true);
+
+
   const [movieDetails, setMovieDetails] =
     useState<MovieDetailsInterface | null>(null);
+  const [isMovieDetailsLoading, setIsMovieDetailsLoading] = useState(true);
   const [toWatch, setToWatch] = useState(false);
   const [favorite, setFavorite] = useState(false);
   const [trailer, setTrailer] = useState<MovieTrailerResult | null>(null);
-
+  const [isTrailerLoading, setIsTrailerLoading] = useState(false);
+  const [similarMovies, setSimilarMovies] = useState<Movie[]>([]);
+  const [isSimilarMoviesLoading, setIsSimilarMoviesLoading] = useState(false);
   const router = useRouter();
   const db = useSQLiteContext();
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
-      setLoading(true);
+      setIsMovieDetailsLoading(true);
       try {
         const details = await getMovieDetails(Number(id));
         setMovieDetails(details);
@@ -66,13 +71,14 @@ const MovieDetails = () => {
       } catch (error) {
         console.error("Failed to fetch movie details:", error);
       }
-      setLoading(false);
+      setIsMovieDetailsLoading(false);
     };
     fetchMovieDetails();
   }, [id]);
 
   useEffect(() => {
     const fetchCast = async () => {
+      setIsCastLoading(true);
       if (movieDetails) {
         try {
           const castData = await getCast(movieDetails.id);
@@ -81,6 +87,7 @@ const MovieDetails = () => {
           console.error("Failed to fetch cast:", error);
         }
       }
+      setIsCastLoading(false);
     };
     fetchCast();
   }, [movieDetails]);
@@ -107,6 +114,7 @@ const MovieDetails = () => {
 
   useEffect(() => {
     const fetchTrailer = async () => {
+      setIsTrailerLoading(true);
       if (movieDetails) {
         try {
           const trailerData = await getMovieTrailer(movieDetails.id);
@@ -115,10 +123,31 @@ const MovieDetails = () => {
         } catch (error) {
           console.error("Failed to fetch movie trailer:", error);
         }
+        setIsTrailerLoading(false);
       }
     };
     fetchTrailer();
   }, [movieDetails]);
+
+  useEffect(() => {
+    const fetchSimilarMovies = async () => {
+      setIsSimilarMoviesLoading(true);
+      if (movieDetails) {
+        try {
+          const similarMoviesData = await getMovieRecommendations(
+            movieDetails.id
+          );
+          setSimilarMovies(similarMoviesData);
+        } catch (error) {
+          console.error("Failed to fetch similar movies:", error);
+        }
+        setIsSimilarMoviesLoading(false);
+      }
+    };
+    fetchSimilarMovies();
+  }, [movieDetails]);
+
+
 
   const onOpenTrailer = async () => {
     if (trailer) {
@@ -160,6 +189,17 @@ const MovieDetails = () => {
     }
   };
 
+    const loading =
+    isCastLoading || isMovieDetailsLoading || isTrailerLoading || isSimilarMoviesLoading;
+
+    if (loading) {
+  return (
+      <View className="flex-1 bg-[#1C1C1E] items-center justify-center">
+        <ActivityIndicator size="large" color="#FF0000" />
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 bg-[#1C1C1E]">
       {movieDetails ? (
@@ -184,7 +224,7 @@ const MovieDetails = () => {
                 <TooltipMenu
                   icon={
                     <Ionicons
-                      name={Bookmark ? "heart" : "heart-outline"}
+                      name={favorite || toWatch ? "heart" : "heart-outline"}
                       size={32}
                       color="white"
                     />
@@ -304,6 +344,37 @@ const MovieDetails = () => {
                 </TouchableOpacity>
               )}
             ></FlatList>
+            <Text className="text-white font-inter text-[20px] py-5  ml-3">
+              Similar Movies
+            </Text>
+            <FlatList
+              data={similarMovies}
+              keyExtractor={(item) => item.id.toString()}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="ml-3"
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  className="mr-4 max-w-24"
+                  onPress={() =>
+                    router.push({
+                      pathname: "../movie/[id]" as const,
+                      params: { id: String(item.id) },
+                    })
+                  }
+                >
+                  <Image
+                    source={{
+                      uri: `https://image.tmdb.org/t/p/w500/${item.poster_path}`,
+                    }}
+                    className="w-24 h-36 rounded-[20px] border-2 border-gray-600"
+                  />
+                  <Text className="text-white text-sm font-nunito mt-2">
+                    {item.title}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
           </View>
         </ScrollView>
       ) : (
