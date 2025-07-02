@@ -1,51 +1,59 @@
-import { useEffect, useState } from 'react';
-import { Alert } from 'react-native';
-import messaging from '@react-native-firebase/messaging';
+// hooks/useFirebaseNotifications.ts
+import { useEffect, useState } from "react";
+import * as Notifications from "expo-notifications";
+import messaging from "@react-native-firebase/messaging";
+import { Platform } from "react-native";
 
-export default function useFirebaseNotifications(): string | null {
-  const [token, setToken] = useState<string | null>(null);
+export default function useFirebaseNotifications() {
+  const [fcmToken, setFcmToken] = useState<string | null>(null);
 
   useEffect(() => {
-    // 1. Request notification permission
+    // 1. Ask permission for notifications (FCM)
     messaging()
       .requestPermission()
       .then(authStatus => {
         const enabled =
           authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
           authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
         if (enabled) {
+          // 2. Get FCM token
           messaging()
             .getToken()
-            .then(fcmToken => {
-              setToken(fcmToken);
-              console.log('FCM Token:', fcmToken);
+            .then(token => {
+              setFcmToken(token);
+              console.log("FCM Token:", token);
             });
         } else {
-          Alert.alert(
-            'Notification permission denied',
-            'Please enable notifications in settings.'
-          );
+          console.warn("Notification permission denied");
         }
       });
 
-    // 2. Handle foreground messages with Alert
+    // 3. Configure notification handler for foreground
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowBanner: true,
+        shouldShowList: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+
+    // 4. Handle foreground FCM messages
     const unsubscribe = messaging().onMessage(async remoteMessage => {
-      Alert.alert(
-        remoteMessage.notification?.title || 'Notification',
-        remoteMessage.notification?.body || JSON.stringify(remoteMessage)
-      );
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: remoteMessage.notification?.title ?? "Notification",
+          body:
+            remoteMessage.notification?.body ??
+            JSON.stringify(remoteMessage.data),
+          data: remoteMessage.data,
+        },
+        trigger: null, // Show immediately
+      });
     });
 
-    // 3. Optional: Handle background/quit state notifications (no UI here)
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
-      // Can log or analytics here if needed
-      console.log('Message handled in the background!', remoteMessage);
-    });
-
-    // Clean up listener on unmount
     return unsubscribe;
   }, []);
 
-  return token;
+  return fcmToken;
 }

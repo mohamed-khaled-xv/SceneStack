@@ -5,26 +5,24 @@ import TabBarIcon from "./../../components/TabBarIcon";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View } from "react-native";
 import useFirebaseNotifications from "@/hooks/useFirebaseNotifications";
-import {db, auth} from "@/firebaseConfig";
+import { db, auth } from "@/firebaseConfig";
 import { useEffect } from "react";
-import { doc, setDoc } from "firebase/firestore"
+import { doc, setDoc } from "firebase/firestore";
+import * as Notifications from "expo-notifications";
+import { useRouter } from "expo-router";
 
 export default function TabLayout() {
-
   const fcmToken = useFirebaseNotifications();
+  const router = useRouter();
 
-   useEffect(() => {
+  useEffect(() => {
     const saveToken = async () => {
       // Only try if user and token exist
       const user = auth.currentUser;
       if (!user || !fcmToken) return;
 
       try {
-        await setDoc(
-          doc(db, "users", user.uid),
-          { fcmToken },
-          { merge: true }
-        );
+        await setDoc(doc(db, "users", user.uid), { fcmToken }, { merge: true });
         // You can also handle arrays or subcollections for multiple tokens
       } catch (error) {
         console.error("Failed to save FCM token:", error);
@@ -33,6 +31,17 @@ export default function TabLayout() {
 
     saveToken();
   }, [fcmToken]);
+
+  // Handle notification taps
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      () => {
+        // Always navigate to the root tab (main screen)
+        router.replace("/"); // Replace with "/" or your actual home screen route
+      }
+    );
+    return () => subscription.remove();
+  }, [router]);
 
   return (
     <View className="flex-1 bg-transparent">
@@ -70,7 +79,7 @@ export default function TabLayout() {
             ),
           }}
         />
-                <Tabs.Screen
+        <Tabs.Screen
           name="search"
           options={{
             title: "Search",
@@ -115,7 +124,6 @@ export default function TabLayout() {
             ),
           }}
         />
-
       </Tabs>
     </View>
   );
