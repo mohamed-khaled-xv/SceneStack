@@ -56,6 +56,7 @@ export interface MovieDetailsInterface {
 }
 
 export interface GetMoviesParams {
+  query?: string;            // For text search, e.g., 'Inception'
   sortBy?: string;           // e.g., 'popularity.desc', 'release_date.desc', etc.
   page?: number;
   withCastId?: number;       // For filtering by actor ID (e.g., 500 for Tom Cruise)
