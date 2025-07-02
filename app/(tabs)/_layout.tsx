@@ -4,8 +4,36 @@ import { icons } from "./../../constants/icons";
 import TabBarIcon from "./../../components/TabBarIcon";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View } from "react-native";
+import useFirebaseNotifications from "@/hooks/useFirebaseNotifications";
+import {db, auth} from "@/firebaseConfig";
+import { useEffect } from "react";
+import { doc, setDoc } from "firebase/firestore"
 
 export default function TabLayout() {
+
+  const fcmToken = useFirebaseNotifications();
+
+   useEffect(() => {
+    const saveToken = async () => {
+      // Only try if user and token exist
+      const user = auth.currentUser;
+      if (!user || !fcmToken) return;
+
+      try {
+        await setDoc(
+          doc(db, "users", user.uid),
+          { fcmToken },
+          { merge: true }
+        );
+        // You can also handle arrays or subcollections for multiple tokens
+      } catch (error) {
+        console.error("Failed to save FCM token:", error);
+      }
+    };
+
+    saveToken();
+  }, [fcmToken]);
+
   return (
     <View className="flex-1 bg-transparent">
       <Tabs

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "157575987530",
+    "project_id": "scenestack-14a96",
+    "storage_bucket": "scenestack-14a96.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:157575987530:android:8f64f9c7258cbd2a5d01b3",
+        "android_client_info": {
+          "package_name": "com.mohamedkhaledxv.SceneStack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIaenmoO691zJ0Ep281bzsduKysZebY84"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
